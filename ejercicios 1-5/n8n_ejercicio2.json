@@ -1,0 +1,120 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "05c6abb5-7d48-430f-8a09-43362c270af2",
+              "name": "Nombre",
+              "value": "Oswald",
+              "type": "string"
+            },
+            {
+              "id": "4e40675a-7943-4802-a16f-ed9c89b305a8",
+              "name": "Ciudad",
+              "value": "Bucaramanga",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        240,
+        -32
+      ],
+      "id": "165d51d5-7a50-48ca-a91e-0f428e02fb1b",
+      "name": "Set data"
+    },
+    {
+      "parameters": {
+        "url": "https://api.open-meteo.com/v1/forecast",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "latitude",
+              "value": "={{ $json.results[0].latitude }}"
+            },
+            {
+              "name": "longitude",
+              "value": "={{ $json.results[0].longitude }}"
+            },
+            {
+              "name": "current_weather",
+              "value": "true"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        656,
+        -32
+      ],
+      "id": "849ed73d-a437-402d-b958-37e31c334dcc",
+      "name": "Consultar Clima"
+    },
+    {
+      "parameters": {
+        "url": "https://geocoding-api.open-meteo.com/v1/search",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "name",
+              "value": "={{ $json.Ciudad }}"
+            },
+            {
+              "name": "count",
+              "value": "1"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        448,
+        -32
+      ],
+      "id": "ba812a15-534c-461e-8819-c9ddd3fbcd09",
+      "name": "Buscar coordenadas"
+    }
+  ],
+  "connections": {
+    "Set data": {
+      "main": [
+        [
+          {
+            "node": "Buscar coordenadas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar coordenadas": {
+      "main": [
+        [
+          {
+            "node": "Consultar Clima",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "acd9990a387a66c572994987ae101756c687c692ab41f4eda3f4b6b5a1a3091c"
+  }
+}

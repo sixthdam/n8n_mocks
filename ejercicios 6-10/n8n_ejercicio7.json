@@ -1,0 +1,274 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "36b0045e-92f3-4e57-a780-5614f9237e3d",
+              "name": "readable_weather",
+              "value": "={{ ({ 0: 'Despejado', 1: 'Principalmente despejado', 2: 'Parcialmente nublado', 3: 'Nublado', 45: 'Niebla', 48: 'Niebla con escarcha', 51: 'Llovizna', 61: 'Lluvia ligera', 63: 'Lluvia moderada', 80: 'Chubascos' })[$json.current_weather.weathercode] \n'Condición mixta' }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        944,
+        -80
+      ],
+      "id": "dfc299ce-e14f-4ae7-968d-d69fe6a2546f",
+      "name": "Readable weather"
+    },
+    {
+      "parameters": {
+        "formTitle": "Consulta de Clima",
+        "formDescription": "Ingrese el nombre de una ciudad para comparar su clima",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Nombre",
+              "placeholder": "Ingrese su nombre",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Ciudad 1",
+              "placeholder": "Ej: Bucaramanga",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Ciudad 2",
+              "placeholder": "Ej: Cali",
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {
+          "buttonLabel": "Comparar"
+        }
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.5,
+      "position": [
+        96,
+        -64
+      ],
+      "id": "e9a7079d-a012-404d-83ca-f751dbd44155",
+      "name": "On form submission",
+      "webhookId": "b0be2867-a838-442f-9717-0d63cf5f2021"
+    },
+    {
+      "parameters": {
+        "url": "https://geocoding-api.open-meteo.com/v1/search",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "name",
+              "value": "={{ $json['Ciudad 1'] }}"
+            },
+            {
+              "name": "count",
+              "value": "1"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        320,
+        -208
+      ],
+      "id": "43723204-0531-40e0-901e-6554e052a363",
+      "name": "coordenadas ciudad 1"
+    },
+    {
+      "parameters": {
+        "url": "https://geocoding-api.open-meteo.com/v1/search",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "name",
+              "value": "={{ $json['Ciudad 2'] }}"
+            },
+            {
+              "name": "count",
+              "value": "1"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        320,
+        80
+      ],
+      "id": "9187e35c-1f70-4217-8d4e-4897433ac7ab",
+      "name": "coordenadas ciudad 2"
+    },
+    {
+      "parameters": {
+        "url": "https://api.open-meteo.com/v1/forecast",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "latitude",
+              "value": "={{ $json.results[0].latitude }}"
+            },
+            {
+              "name": "longitude",
+              "value": "={{ $json.results[0].longitude }}"
+            },
+            {
+              "name": "current_weather",
+              "value": "true"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        528,
+        -208
+      ],
+      "id": "99eeae47-7b5c-46d0-afe8-0e4cf5235184",
+      "name": "Clima ciudad 1"
+    },
+    {
+      "parameters": {
+        "url": "https://api.open-meteo.com/v1/forecast",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "latitude",
+              "value": "={{ $json.results[0].latitude }}"
+            },
+            {
+              "name": "longitude",
+              "value": "={{ $json.results[0].longitude }}"
+            },
+            {
+              "name": "current_weather",
+              "value": "true"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        528,
+        80
+      ],
+      "id": "d96ceef6-c81e-4296-9723-ddf4ab6908f6",
+      "name": "Clima ciudad 2"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        752,
+        -80
+      ],
+      "id": "e82205bb-3ffd-4f5b-be34-bd62350a1ef0",
+      "name": "Merge"
+    }
+  ],
+  "connections": {
+    "Readable weather": {
+      "main": [
+        []
+      ]
+    },
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "coordenadas ciudad 1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "coordenadas ciudad 2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "coordenadas ciudad 1": {
+      "main": [
+        [
+          {
+            "node": "Clima ciudad 1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "coordenadas ciudad 2": {
+      "main": [
+        [
+          {
+            "node": "Clima ciudad 2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Clima ciudad 1": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Clima ciudad 2": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Readable weather",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "acd9990a387a66c572994987ae101756c687c692ab41f4eda3f4b6b5a1a3091c"
+  }
+}
