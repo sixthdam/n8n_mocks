@@ -1,0 +1,428 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "1pGQ9xTkFbJAm9xmC9tGaxDGBFfABLkPbvibTkvlz7VU"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Hoja 1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1pGQ9xTkFbJAm9xmC9tGaxDGBFfABLkPbvibTkvlz7VU/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Temperatura": "={{ $('Clima ciudad').item.json.current_weather.temperature }} {{ $('Clima ciudad').item.json.current_weather_units.temperature }}",
+            "Clima": "={{ $json.readable_weather }}",
+            "Ciudad": "={{ $('coordenadas ciudad 1').item.json.results[0].name }}",
+            "Nombre": "={{ $('On form submission').item.json.Nombre }}",
+            "Fecha": "={{$now.setZone(\"America/Bogota\").toFormat(\"yyyy-LL-dd HH:mm:ss\")}}"
+          },
+          "matchingColumns": [
+            "Fecha"
+          ],
+          "schema": [
+            {
+              "id": "Fecha",
+              "displayName": "Fecha",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Nombre",
+              "displayName": "Nombre",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Ciudad",
+              "displayName": "Ciudad",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Temperatura",
+              "displayName": "Temperatura",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Clima",
+              "displayName": "Clima",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1168,
+        -288
+      ],
+      "id": "72aa7b40-60b5-49f9-9f2c-bdb005454428",
+      "name": "Append or update row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "QKcWZPgN4uptLN2V",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "36b0045e-92f3-4e57-a780-5614f9237e3d",
+              "name": "readable_weather",
+              "value": "={{ ({ 0: 'Despejado', 1: 'Principalmente despejado', 2: 'Parcialmente nublado', 3: 'Nublado', 45: 'Niebla', 48: 'Niebla con escarcha', 51: 'Llovizna', 61: 'Lluvia ligera', 63: 'Lluvia moderada', 80: 'Chubascos' })[$json.current_weather.weathercode] \n'Condición mixta' }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        976,
+        -288
+      ],
+      "id": "dfc299ce-e14f-4ae7-968d-d69fe6a2546f",
+      "name": "Readable weather"
+    },
+    {
+      "parameters": {
+        "formTitle": "Consulta de Clima",
+        "formDescription": "Ingrese el nombre de una ciudad para consultar su clima",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Nombre",
+              "placeholder": "Ingrese su nombre",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Ciudad",
+              "placeholder": "Ej: Bucaramanga",
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {
+          "buttonLabel": "Consultar"
+        }
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.5,
+      "position": [
+        96,
+        -64
+      ],
+      "id": "e9a7079d-a012-404d-83ca-f751dbd44155",
+      "name": "On form submission",
+      "webhookId": "b0be2867-a838-442f-9717-0d63cf5f2021"
+    },
+    {
+      "parameters": {
+        "url": "https://geocoding-api.open-meteo.com/v1/search",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "name",
+              "value": "={{ $json.Ciudad }}"
+            },
+            {
+              "name": "count",
+              "value": "2"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        272,
+        -64
+      ],
+      "id": "43723204-0531-40e0-901e-6554e052a363",
+      "name": "coordenadas ciudad 1",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "url": "https://api.open-meteo.com/v1/forecast",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "latitude",
+              "value": "={{ $json.latitude }}"
+            },
+            {
+              "name": "longitude",
+              "value": "={{ $json.longitude }}"
+            },
+            {
+              "name": "current_weather",
+              "value": "true"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        800,
+        -272
+      ],
+      "id": "99eeae47-7b5c-46d0-afe8-0e4cf5235184",
+      "name": "Clima ciudad",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "e07fbaf9-059f-4a3f-9239-af752b80adab",
+              "leftValue": "={{ $json.admin2 }}",
+              "rightValue": "={{ $('On form submission').item.json.Ciudad }}",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        624,
+        -64
+      ],
+      "id": "28174b5b-acab-4b20-9aa2-67a3ec9624d8",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "results",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        448,
+        -64
+      ],
+      "id": "a5aa6625-735c-4e00-b673-94ab5c1bf7e8",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "6c20c945-ee70-426f-a78b-7a8a989c114f",
+              "name": "Error",
+              "value": "No se encontró la información solicitada.",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        800,
+        112
+      ],
+      "id": "df8ec386-88e7-412c-8538-00763d8e19e2",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "errorMessage": "Ha ocurrido un error"
+      },
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [
+        448,
+        112
+      ],
+      "id": "09f7696d-6131-484f-bcea-487c864220d3",
+      "name": "Stop and Error"
+    },
+    {
+      "parameters": {
+        "errorMessage": "Ha ocurrido un error."
+      },
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [
+        976,
+        -112
+      ],
+      "id": "fc72d108-124b-4137-8511-a05558f56145",
+      "name": "Stop and Error1"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1008,
+        112
+      ],
+      "id": "b987e1eb-0d69-45d1-9bcf-77fd753b2983",
+      "name": "No Operation, do nothing"
+    }
+  ],
+  "connections": {
+    "Readable weather": {
+      "main": [
+        [
+          {
+            "node": "Append or update row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "coordenadas ciudad 1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "coordenadas ciudad 1": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Stop and Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Clima ciudad": {
+      "main": [
+        [
+          {
+            "node": "Readable weather",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Stop and Error1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Clima ciudad",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "acd9990a387a66c572994987ae101756c687c692ab41f4eda3f4b6b5a1a3091c"
+  }
+}
